@@ -72,11 +72,12 @@ export default function CartSheet() {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg flex flex-col">
         <SheetHeader>
           <SheetTitle>Carrito de Compras</SheetTitle>
         </SheetHeader>
-        <div className="mt-8">
+        
+        <div className="flex-1 overflow-hidden">
           {cart.items.length === 0 ? (
             <div className="text-center py-6">
               <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground" />
@@ -86,62 +87,67 @@ export default function CartSheet() {
               </p>
             </div>
           ) : isCheckingOut ? (
-            <PaymentForm
-              amount={cart.total}
-              items={cart.items}
-              onSuccess={handleCheckoutSuccess}
-              onCancel={() => setIsCheckingOut(false)}
-            />
+            <div className="h-full overflow-hidden">
+              <PaymentForm
+                amount={cart.total}
+                items={cart.items}
+                onSuccess={handleCheckoutSuccess}
+                onCancel={() => setIsCheckingOut(false)}
+              />
+            </div>
           ) : (
-            <div className="space-y-4">
-              {cart.items.map((item) => {
-                const product = products?.find(p => p.id === item.productId);
-                const maxStock = product?.stock || 0;
-                
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center space-x-4 py-2 border-b"
-                  >
-                    <div className="h-16 w-16 relative rounded overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        ${item.price.toFixed(2)}
-                      </p>
-                      {maxStock < item.quantity && (
-                        <p className="text-sm text-red-600">
-                          Solo hay {maxStock} unidades disponibles
-                        </p>
-                      )}
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          max={maxStock}
-                          value={item.quantity}
-                          onChange={(e) => handleQuantityChange(item.productId, parseInt(e.target.value))}
-                          className="w-20"
+            <div className="h-full flex flex-col">
+              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                {cart.items.map((item) => {
+                  const product = products?.find(p => p.id === item.productId);
+                  const maxStock = product?.stock || 0;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center space-x-4 py-2 border-b"
+                    >
+                      <div className="h-16 w-16 relative rounded overflow-hidden flex-shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="object-cover w-full h-full"
                         />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.productId)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          ${item.price.toFixed(2)}
+                        </p>
+                        {maxStock < item.quantity && (
+                          <p className="text-sm text-red-600">
+                            Solo hay {maxStock} unidades disponibles
+                          </p>
+                        )}
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Input
+                            type="number"
+                            min="1"
+                            max={maxStock}
+                            value={item.quantity}
+                            onChange={(e) => handleQuantityChange(item.productId, parseInt(e.target.value))}
+                            className="w-20"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeItem(item.productId)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-              <div className="pt-4 border-t">
+                  );
+                })}
+              </div>
+              
+              <div className="pt-4 border-t mt-4">
                 <div className="flex justify-between text-lg font-medium">
                   <span>Total</span>
                   <span>${cart.total.toFixed(2)}</span>

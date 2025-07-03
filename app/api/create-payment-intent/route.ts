@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from '@supabase/supabase-js';
 import { CartItem } from '@/types/cart';
+import { ShippingAddress } from '@/types/shipping';
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Supabase
@@ -10,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, items } = await request.json();
+    const { amount, items, shippingAddress, shippingCost } = await request.json();
 
     // Get the user session from the request
     const authHeader = request.headers.get('Authorization');
@@ -34,6 +35,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         userId: userId,
         items: JSON.stringify(items || []),
+        shippingAddressId: shippingAddress?.id || '',
+        shippingCost: shippingCost?.toString() || '0',
       },
     });
 

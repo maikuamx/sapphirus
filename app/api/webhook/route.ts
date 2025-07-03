@@ -26,8 +26,10 @@ export async function POST(request: NextRequest) {
         // Extract metadata
         const userId = paymentIntent.metadata.userId;
         const items: CartItem[] = JSON.parse(paymentIntent.metadata.items || '[]');
+        const shippingAddressId = paymentIntent.metadata.shippingAddressId;
+        const shippingCost = parseFloat(paymentIntent.metadata.shippingCost || '0');
         
-        if (!userId || !items.length) {
+        if (!userId || !items.length || !shippingAddressId) {
           throw new Error('Missing required metadata');
         }
 
@@ -52,6 +54,8 @@ export async function POST(request: NextRequest) {
             user_id: userId,
             status: 'processing',
             total_amount: paymentIntent.amount / 100, // Convert from cents
+            shipping_address_id: shippingAddressId,
+            shipping_cost: shippingCost,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })

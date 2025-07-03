@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Camera } from 'lucide-react';
+import { User, Mail, Camera, MapPin } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { getCloudinaryUploadWidget } from '@/lib/cloudinary';
@@ -11,7 +11,10 @@ import { requireAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import ShippingAddressForm from '@/components/shipping/shipping-address-form';
+import ShippingAddressSelector from '@/components/shipping/shipping-address-selector';
 
 interface Profile {
   id: string;
@@ -24,6 +27,7 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
 
   useEffect(() => {
     requireAuth();
@@ -107,85 +111,125 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          <Card>
-            <CardHeader>
-              <CardTitle>Mi Perfil</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center mb-8">
-                <div className="relative">
-                  <div className="w-32 h-32 rounded-full overflow-hidden bg-muted">
-                    {profile?.avatar_url ? (
-                      <img
-                        src={profile.avatar_url}
-                        alt={profile.full_name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-full h-full p-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute bottom-0 right-0 rounded-full"
-                    onClick={handleAvatarUpload}
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
+              <TabsTrigger value="addresses">Direcciones</TabsTrigger>
+            </TabsList>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Nombre completo
-                  </label>
-                  <Input
-                    name="full_name"
-                    defaultValue={profile?.full_name}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Correo electrónico
-                  </label>
-                  <Input
-                    name="email"
-                    type="email"
-                    defaultValue={profile?.email}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-4">
-                  {isEditing ? (
-                    <>
+            <TabsContent value="profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Información Personal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col items-center mb-8">
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full overflow-hidden bg-muted">
+                        {profile?.avatar_url ? (
+                          <img
+                            src={profile.avatar_url}
+                            alt={profile.full_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-full h-full p-6 text-muted-foreground" />
+                        )}
+                      </div>
                       <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
+                        size="icon"
+                        variant="secondary"
+                        className="absolute bottom-0 right-0 rounded-full"
+                        onClick={handleAvatarUpload}
                       >
-                        Cancelar
+                        <Camera className="h-4 w-4" />
                       </Button>
-                      <Button type="submit">
-                        Guardar cambios
-                      </Button>
-                    </>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Nombre completo
+                      </label>
+                      <Input
+                        name="full_name"
+                        defaultValue={profile?.full_name}
+                        disabled={!isEditing}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Correo electrónico
+                      </label>
+                      <Input
+                        name="email"
+                        type="email"
+                        defaultValue={profile?.email}
+                        disabled={!isEditing}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-4">
+                      {isEditing ? (
+                        <>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsEditing(false)}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button type="submit">
+                            Guardar cambios
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={() => setIsEditing(true)}
+                        >
+                          Editar perfil
+                        </Button>
+                      )}
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="addresses">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Mis Direcciones de Envío
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {showAddressForm ? (
+                    <ShippingAddressForm
+                      onSuccess={() => setShowAddressForm(false)}
+                      onCancel={() => setShowAddressForm(false)}
+                    />
                   ) : (
-                    <Button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Editar perfil
-                    </Button>
+                    <div className="space-y-4">
+                      <div className="flex justify-end">
+                        <Button onClick={() => setShowAddressForm(true)}>
+                          Agregar Nueva Dirección
+                        </Button>
+                      </div>
+                      <ShippingAddressSelector
+                        onAddressSelect={() => {}}
+                        onShippingCostChange={() => {}}
+                      />
+                    </div>
                   )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </motion.div>
       </div>
     </div>

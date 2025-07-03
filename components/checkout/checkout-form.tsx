@@ -6,15 +6,25 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { ShippingAddress } from '@/types/shipping';
 
 interface CheckoutFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   items: any[];
   total: number;
+  shippingAddress: ShippingAddress;
+  shippingCost: number;
 }
 
-export default function CheckoutForm({ onSuccess, onCancel, items, total }: CheckoutFormProps) {
+export default function CheckoutForm({ 
+  onSuccess, 
+  onCancel, 
+  items, 
+  total, 
+  shippingAddress,
+  shippingCost 
+}: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -33,6 +43,8 @@ export default function CheckoutForm({ onSuccess, onCancel, items, total }: Chec
           user_id: session.user.id,
           status: 'processing',
           total_amount: total,
+          shipping_address_id: shippingAddress.id,
+          shipping_cost: shippingCost,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -57,15 +69,24 @@ export default function CheckoutForm({ onSuccess, onCancel, items, total }: Chec
         if (itemError) throw itemError;
 
         // Update product stock
-        const { error: stockError } = await supabase.rpc(
-          'update_product_stock',
-          { 
-            p_product_id: item.productId, 
-            p_quantity: item.quantity 
-          }
-        );
+        const { data: product, error: productError } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.productId)
+          .single();
 
-        if (stockError) throw stockError;
+        if (productError) throw productError;
+
+        const newStock = Math.max(0, product.stock - item.quantity);
+        const { error: updateError } = await supabase
+          .from('products')
+          .update({ 
+            stock: newStock,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', item.productId);
+
+        if (updateError) throw updateError;
       }
 
       console.log(`Order created: ${order.id}`);
@@ -128,31 +149,42 @@ export default function CheckoutForm({ onSuccess, onCancel, items, total }: Chec
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
-      <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isProcessing}
-        >
-          Cancelar
-        </Button>
-        <Button
-          type="submit"
-          disabled={!stripe || isProcessing}
-        >
-          {isProcessing ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
-              Procesando...
-            </>
-          ) : (
-            'Pagar'
-          )}
-        </Button>
-      </div>
-    </form>
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="min-h-[200px]">
+          <PaymentElement 
+            options={{
+              layout: 'tabs',
+              paymentMethodOrder: ['card'],
+            }}
+          />
+        </div>
+        
+        <div className="flex justify-end gap-4 pt-4 border-t sticky bottom-0 bg-background">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isProcessing}
+          >
+            Volver
+          </Button>
+          <Button
+            type="submit"
+            disabled={!stripe || isProcessing}
+            className="min-w-[120px]"
+          >
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
+                Procesando...
+              </>
+            ) : (
+              `Pagar $${total.toFixed(2)}`
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
