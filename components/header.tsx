@@ -60,7 +60,7 @@ export default function Header() {
         await fetchUserProfile(session.user.id);
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
+      
     }
   }
 
@@ -74,7 +74,7 @@ export default function Header() {
 
       setUserProfile(profile);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      
     }
   }
 
@@ -86,7 +86,7 @@ export default function Header() {
       setIsMobileMenuOpen(false);
       router.push('/');
     } catch (error) {
-      console.error('Error signing out:', error);
+      
     }
   };
 

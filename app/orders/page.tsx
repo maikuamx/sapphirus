@@ -67,7 +67,7 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false });
 
 
-      console.log(data);    
+      
       if (error) throw error;
 
       // Transform the raw data to match our Order type

@@ -69,7 +69,7 @@ export default function PaymentForm({ amount, onSuccess, onCancel, items }: Paym
 
         setClientSecret(data.clientSecret);
       } catch (error: any) {
-        console.error('Payment intent error:', error);
+        
         toast({
           title: "Error",
           description: error.message || "Error al procesar el pago",

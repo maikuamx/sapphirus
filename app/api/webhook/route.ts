@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
           .limit(1);
 
         if (existingOrders && existingOrders.length > 0) {
-          console.log(`Order already exists for payment intent ${paymentIntent.id}`);
+          
           return NextResponse.json({ received: true, status: 'order_exists' });
         }
 
@@ -75,12 +75,12 @@ export async function POST(request: NextRequest) {
               .single();
 
             if (productError) {
-              console.error(`Error fetching product ${item.productId}:`, productError);
+              
               continue;
             }
 
             if (!product) {
-              console.error(`Product ${item.productId} not found`);
+              
               continue;
             }
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
               });
 
             if (itemError) {
-              console.error(`Error creating order item for product ${item.productId}:`, itemError);
+              
               continue;
             }
 
@@ -111,16 +111,16 @@ export async function POST(request: NextRequest) {
               .eq('id', item.productId);
 
             if (updateError) {
-              console.error(`Error updating stock for product ${item.productId}:`, updateError);
+              
             } else {
-              console.log(`Successfully updated stock for product ${item.productId} from ${product.stock} to ${newStock}`);
+              
             }
           } catch (itemProcessError) {
-            console.error(`Error processing item ${item.productId}:`, itemProcessError);
+            
           }
         }
 
-        console.log(`Payment succeeded and order created: ${order.id}`);
+        
         return NextResponse.json({ 
           received: true, 
           orderId: order.id,
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         });
 
       } catch (error) {
-        console.error('Error processing payment success:', error);
+        
         return NextResponse.json({ 
           error: 'Error processing payment',
           details: error instanceof Error ? error.message : 'Unknown error'
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    
     return NextResponse.json({ 
       error: 'Webhook processing error',
       details: error instanceof Error ? error.message : 'Unknown error'

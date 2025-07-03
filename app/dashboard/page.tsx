@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       
         
       const completedOrders = orders?.filter(order => order.status === 'processing') || [];
-      console.log(completedOrders);
+      
       const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
 
       const { count: productCount } = await supabase

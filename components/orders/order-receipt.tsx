@@ -85,7 +85,7 @@ export default function OrderReceipt({ order }: OrderReceiptProps) {
         description: "El recibo se ha descargado correctamente",
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      
       toast({
         title: "Error",
         description: "No se pudo generar el recibo",

@@ -53,7 +53,7 @@ export default function FeaturedProducts() {
         if (error) throw error;
         setProducts(data || []);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        
       } finally {
         setLoading(false);
       }

@@ -89,10 +89,10 @@ export default function CheckoutForm({
         if (updateError) throw updateError;
       }
 
-      console.log(`Order created: ${order.id}`);
+      
       return order.id;
     } catch (error) {
-      console.error('Error creating order:', error);
+      
       throw error;
     }
   };
