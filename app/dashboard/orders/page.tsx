@@ -180,7 +180,7 @@ export default function AdminOrdersPage() {
           .filter(order => order.shipping_address_id)
           .map(order => order.shipping_address_id);
 
-        let shippingAddressesData = [];
+        let shippingAddressesData: ShippingAddress[] = [];
         if (shippingAddressIds.length > 0) {
           
 
