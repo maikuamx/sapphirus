@@ -320,7 +320,7 @@ export default function CatalogPage() {
               {/* Desktop pagination - show all pages */}
               <div className="hidden sm:flex items-center gap-2">
                 {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                  let pageNumber;
+                  let pageNumber: number;
                   if (totalPages <= 7) {
                     pageNumber = i + 1;
                   } else if (currentPage <= 4) {
