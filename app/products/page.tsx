@@ -261,27 +261,89 @@ export default function CatalogPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex justify-center items-center gap-2">
+          <div className="mt-8 flex justify-center items-center gap-1 sm:gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
+              className="h-8 w-8 sm:h-10 sm:w-10"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Mobile pagination - show only current, prev, next */}
+              <div className="flex sm:hidden items-center gap-1">
+                {currentPage > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    className="h-8 px-2"
+                  >
+                    {currentPage - 1}
+                  </Button>
+                )}
                 <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setCurrentPage(page)}
+                  variant="default"
+                  size="sm"
+                  className="h-8 px-2"
                 >
-                  {page}
+                  {currentPage}
                 </Button>
-              ))}
+                {currentPage < totalPages && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="h-8 px-2"
+                  >
+                    {currentPage + 1}
+                  </Button>
+                )}
+                {currentPage < totalPages - 1 && (
+                  <span className="text-muted-foreground px-1">...</span>
+                )}
+                {currentPage < totalPages - 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="h-8 px-2"
+                  >
+                    {totalPages}
+                  </Button>
+                )}
+              </div>
+
+              {/* Desktop pagination - show all pages */}
+              <div className="hidden sm:flex items-center gap-2">
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 7) {
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 4) {
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 3) {
+                    pageNumber = totalPages - 6 + i;
+                  } else {
+                    pageNumber = currentPage - 3 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setCurrentPage(pageNumber)}
+                      className="h-10 w-10"
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
 
             <Button
@@ -289,9 +351,15 @@ export default function CatalogPage() {
               size="icon"
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
+              className="h-8 w-8 sm:h-10 sm:w-10"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
+            
+            {/* Page info for mobile */}
+            <div className="sm:hidden ml-2 text-sm text-muted-foreground">
+              {currentPage} de {totalPages}
+            </div>
           </div>
         )}
       </div>
